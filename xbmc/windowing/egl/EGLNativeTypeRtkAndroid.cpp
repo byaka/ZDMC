@@ -169,7 +169,7 @@ bool CEGLNativeTypeRtkAndroid::CheckCompatibility()
       return true;
     else
       CLog::Log(LOGERROR, "RTKEGL: no r on /sys/devices/virtual/switch/hdmi/state");
-  }	
+  }
 
   return false;
 }
@@ -237,7 +237,7 @@ bool CEGLNativeTypeRtkAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
 bool CEGLNativeTypeRtkAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
 {
 
-  CLog::Log(LOGDEBUG, "RTKEGL:SetNativeResolution, res = %s", 
+  CLog::Log(LOGDEBUG, "RTKEGL:SetNativeResolution, res = %s",
     StringUtils::Format("%dx%d%s @ %.2f", res.iScreenWidth, res.iScreenHeight, res.dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "p", res.fRefreshRate).c_str());
   switch((int)(res.fRefreshRate*10))
   {
@@ -260,7 +260,7 @@ bool CEGLNativeTypeRtkAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
             if (res.iScreenHeight == 480)
             {
               if (res.dwFlags & D3DPRESENTFLAG_INTERLACED)
-                return SetDisplayResolution(RES_NTSC); // 480i / NTSC  
+                return SetDisplayResolution(RES_NTSC); // 480i / NTSC
               else
                 return SetDisplayResolution(RES_480P_60HZ); // 480p@60hz
             }
@@ -274,7 +274,7 @@ bool CEGLNativeTypeRtkAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
           }
           break;
         case 1280:
-          return SetDisplayResolution(RES_720P_60HZ); 
+          return SetDisplayResolution(RES_720P_60HZ);
           break;
         case 1920:
           if (res.dwFlags & D3DPRESENTFLAG_INTERLACED)
@@ -300,7 +300,7 @@ bool CEGLNativeTypeRtkAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
            return SetDisplayResolution(RES_720P_59HZ);
            break;
         default:
-        case 1920:    
+        case 1920:
           if (res.dwFlags & D3DPRESENTFLAG_INTERLACED)
             return SetDisplayResolution(RES_1080I_59HZ);
           else
@@ -335,16 +335,16 @@ bool CEGLNativeTypeRtkAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
           return SetDisplayResolution(RES_3840X2160P_30HZ);
           break;
         case 1280:
-          return SetDisplayResolution(RES_720P_60HZ); // HACK: no 720@30HZ, set to 720p@60HZ  
+          return SetDisplayResolution(RES_720P_60HZ); // HACK: no 720@30HZ, set to 720p@60HZ
           break;
         case 4096:
-          return SetDisplayResolution(RES_4096X2160P_30HZ); 
+          return SetDisplayResolution(RES_4096X2160P_30HZ);
           break;
         case 1920:
-          return SetDisplayResolution(RES_1080P_30HZ); 
+          return SetDisplayResolution(RES_1080P_30HZ);
           break;
         default:
-          if (res.dwFlags & D3DPRESENTFLAG_INTERLACED)  
+          if (res.dwFlags & D3DPRESENTFLAG_INTERLACED)
             return SetDisplayResolution(RES_1080I_60HZ); // NO 1080I @ 30, set to 1080I @ 60
           else
             return SetDisplayResolution(RES_1080P_30HZ);
@@ -377,7 +377,7 @@ bool CEGLNativeTypeRtkAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
         case 1920:
           return SetDisplayResolution(RES_1080P_25HZ);
           break;
-        default: 
+        default:
           if (res.dwFlags & D3DPRESENTFLAG_INTERLACED)
             return SetDisplayResolution(RES_1080I_50HZ);
           else
@@ -418,8 +418,42 @@ bool CEGLNativeTypeRtkAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
 void CEGLNativeTypeRtkAndroid::GuessResolution(int mode, std::vector<RESOLUTION_INFO> &resolutions)
 {
     RESOLUTION_INFO res;
-    //CLog::Log(LOGDEBUG, "RTKEGL:GuessResolution, mode = %d", mode);
+    CLog::Log(LOGDEBUG, "RTKEGL:GuessResolution, mode = %d", mode);
     switch (mode) {
+      // floating fps fix [START]
+      case RES_3840X2160P_60HZ:
+        if (SysModeToResolution(RES_3840X2160P_59HZ, &res) && (supported_resolutions[RES_3840X2160P_59HZ] == 0)) {
+          res.iWidth = m_fb_res.iWidth;
+          res.iHeight = m_fb_res.iHeight;
+          resolutions.push_back(res);
+          supported_resolutions[RES_3840X2160P_59HZ] = 1;
+        }
+        break;
+      case RES_3840X2160P_24HZ:
+        if (SysModeToResolution(RES_3840X2160P_23HZ, &res) && (supported_resolutions[RES_3840X2160P_23HZ] == 0)) {
+          res.iWidth = m_fb_res.iWidth;
+          res.iHeight = m_fb_res.iHeight;
+          resolutions.push_back(res);
+          supported_resolutions[RES_3840X2160P_23HZ] = 1;
+        }
+        break;
+      case RES_1080P_24HZ:
+        if (SysModeToResolution(RES_1080P_23HZ, &res) && (supported_resolutions[RES_1080P_23HZ] == 0)) {
+          res.iWidth = m_fb_res.iWidth;
+          res.iHeight = m_fb_res.iHeight;
+           resolutions.push_back(res);
+           supported_resolutions[RES_1080P_23HZ] = 1;
+        }
+        break;
+      case RES_1080P_60HZ:
+        if (SysModeToResolution(RES_1080P_59HZ, &res) && (supported_resolutions[RES_1080P_59HZ] == 0)) {
+          res.iWidth = m_fb_res.iWidth;
+          res.iHeight = m_fb_res.iHeight;
+           resolutions.push_back(res);
+           supported_resolutions[RES_1080P_59HZ] = 1;
+        }
+        break;
+      // floating fps fix [END]
       case RES_720P_50HZ:
         if (SysModeToResolution(RES_720P_25HZ, &res) && (supported_resolutions[RES_720P_25HZ] == 0)) {
             res.iWidth = m_fb_res.iWidth;
@@ -528,7 +562,7 @@ bool CEGLNativeTypeRtkAndroid::SetDisplayResolution(int resolution)
   } else {
     return false;
   }
-  
+
   m_curHdmiResolution = resolution;
 
   return true;
