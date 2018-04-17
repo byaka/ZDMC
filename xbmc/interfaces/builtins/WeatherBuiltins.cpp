@@ -22,6 +22,8 @@
 
 #include "guilib/GUIWindowManager.h"
 
+#include <stdlib.h>     /* atoi fix */
+
 /*! \brief Switch to a given weather location.
  *  \param params The parameters.
  *  \details params[0] = 1, 2 or 3.
