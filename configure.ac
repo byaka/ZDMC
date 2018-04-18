@@ -647,6 +647,18 @@ case $host in
      use_x11=no
      build_shared_lib=yes
      ;;
+  aarch64*-*linux-android*)
+     target_platform=target_android
+     CORE_SYSTEM_NAME=android
+     use_arch="aarch64"
+     use_cpu=cortex-a9
+     ARCH="aarch64"
+     use_neon=yes
+     use_gles=yes
+     use_optical_drive=no
+     use_x11=no
+     build_shared_lib=yes
+     ;;
   mips*-*-linux-gnu*)
      target_platform=target_linux
      CORE_SYSTEM_NAME=linux
